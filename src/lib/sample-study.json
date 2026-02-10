@@ -1,0 +1,54 @@
+{
+  "title": "Sample E-commerce Study",
+  "researcherName": "Test Researcher",
+  "description": "A sample tree test for an e-commerce website navigation.",
+  "tree": {
+    "id": "root",
+    "label": "Home",
+    "children": [
+      {
+        "id": "products",
+        "label": "Products",
+        "children": [
+          { "id": "electronics", "label": "Electronics", "children": [] },
+          { "id": "clothing", "label": "Clothing", "children": [] },
+          { "id": "books", "label": "Books", "children": [] }
+        ]
+      },
+      {
+        "id": "account",
+        "label": "My Account",
+        "children": [
+          { "id": "orders", "label": "Order History", "children": [] },
+          { "id": "settings", "label": "Settings", "children": [
+            { "id": "password", "label": "Change Password", "children": [] },
+            { "id": "notifications", "label": "Notifications", "children": [] }
+          ]}
+        ]
+      },
+      {
+        "id": "support",
+        "label": "Help & Support",
+        "children": [
+          { "id": "faq", "label": "FAQ", "children": [] },
+          { "id": "contact", "label": "Contact Us", "children": [] },
+          { "id": "returns", "label": "Returns & Refunds", "children": [] }
+        ]
+      }
+    ]
+  },
+  "tasks": [
+    {
+      "prompt": "Where would you go to change your password?",
+      "expectedNodeId": "password"
+    },
+    {
+      "prompt": "Where would you find information about returning a product?",
+      "expectedNodeId": "returns"
+    },
+    {
+      "prompt": "Where would you go to browse for laptops?",
+      "expectedNodeId": "electronics"
+    }
+  ]
+}
