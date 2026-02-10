@@ -3,7 +3,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
 	import { Slider } from '$lib/components/ui/slider';
-	import { ChevronRight, ArrowLeft, Check } from '@lucide/svelte';
+	import { ChevronRight, ChevronDown } from '@lucide/svelte';
 
 	let { data } = $props();
 
@@ -19,6 +19,9 @@
 	let pathStack = $state<TreeNode[]>([]);
 	let currentNode = $derived(pathStack[pathStack.length - 1]);
 
+	// Task flow
+	let taskStarted = $state(false);
+
 	// Click tracking
 	let taskStartTime = $state(0);
 	let firstClickRecorded = $state(false);
@@ -31,7 +34,19 @@
 
 	function startStudy() {
 		phase = 'task';
-		pathStack = [data.tree.nodes as TreeNode];
+		taskStarted = false;
+	}
+
+	function startTask() {
+		// Wrapper node so root ("Home") appears as a clickable/selectable option
+		const wrapper: TreeNode = {
+			id: '__wrapper',
+			label: '',
+			children: [data.tree.nodes as TreeNode]
+		};
+		pathStack = [wrapper];
+		selectedNodeId = null;
+		taskStarted = true;
 		taskStartTime = Date.now();
 	}
 
@@ -47,22 +62,31 @@
 	function expandNode(child: TreeNode) {
 		recordClick(child.id, 'expand');
 		pathStack = [...pathStack, child];
+		selectedNodeId = child.id;
 	}
 
-	function goBack() {
+	function collapseToLevel(level: number) {
+		const collapsedNode = pathStack[level];
+		recordClick(collapsedNode.id, 'back');
+		pathStack = pathStack.slice(0, level);
+		// Select the parent we collapsed to, unless it's the wrapper
 		if (pathStack.length > 1) {
-			recordClick(currentNode.id, 'back');
-			pathStack = pathStack.slice(0, -1);
+			selectedNodeId = pathStack[pathStack.length - 1].id;
+		} else {
+			selectedNodeId = null;
 		}
 	}
 
-	function selectNode(nodeId: string) {
+	function selectLeaf(nodeId: string) {
 		recordClick(nodeId, 'select');
 		selectedNodeId = nodeId;
+	}
+
+	function submitSelection() {
 		phase = 'confidence';
 	}
 
-	function submitConfidence() {
+	async function submitConfidence() {
 		const currentTask = data.tasks[currentTaskIndex];
 		responses.push({
 			taskId: currentTask.id,
@@ -80,19 +104,26 @@
 			resetTask();
 		} else {
 			phase = 'done';
-			// TODO: submit responses to server
+			await fetch(`/study/${data.study.id}/submit`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					participantName,
+					responses
+				})
+			});
 		}
 	}
 
 	function resetTask() {
 		phase = 'task';
-		pathStack = [treeRoot];
+		taskStarted = false;
+		pathStack = [];
 		clickHistory = [];
 		selectedNodeId = null;
 		firstClickRecorded = false;
 		timeToFirstClick = 0;
 		confidence = 5;
-		taskStartTime = Date.now();
 	}
 </script>
 
@@ -126,42 +157,66 @@
 				<Card.Title class="text-lg">{data.tasks[currentTaskIndex].prompt}</Card.Title>
 			</Card.Header>
 			<Card.Content>
-				<p class="mb-2 text-sm text-muted-foreground">
-					{pathStack.map((n) => n.label).join(' > ')}
-				</p>
-				{#if pathStack.length > 1}
-					<Button variant="ghost" size="sm" onclick={goBack} class="mb-2">
-						<ArrowLeft class="mr-1 h-4 w-4" />
-						Back
-					</Button>
-				{/if}
-				<div class="space-y-1">
-					{#each currentNode.children as child}
-						<div class="flex items-center gap-2">
-							{#if child.children.length > 0}
-								<Button
-									variant="ghost"
-									class="w-full justify-start"
-									onclick={() => expandNode(child)}
-								>
-									{child.label}
-									<ChevronRight class="ml-auto h-4 w-4" />
-								</Button>
-								<Button variant="outline" size="sm" onclick={() => selectNode(child.id)}>
-									<Check class="h-4 w-4" />
-								</Button>
+				{#if !taskStarted}
+					<Button onclick={startTask}>Start Task</Button>
+				{:else}
+					{#snippet renderLevel(parentNode: TreeNode, depth: number)}
+						<div class={depth > 0 ? 'ml-2 space-y-1 border-l-2 border-muted pl-3' : 'space-y-1'}>
+							{#if pathStack.length > depth + 1}
+								<!-- This level has an expanded node — only show it -->
+								{@const expandedNode = pathStack[depth + 1]}
+								{@const isDirectParent = pathStack.length === depth + 2}
+								{#if isDirectParent}
+									<Button
+										variant={selectedNodeId === expandedNode.id ? 'default' : 'ghost'}
+										size="sm"
+										onclick={() => collapseToLevel(depth + 1)}
+									>
+										<ChevronDown class="mr-1 h-4 w-4" />
+										{expandedNode.label}
+									</Button>
+								{:else}
+									<p class="py-1 text-sm font-medium text-muted-foreground">
+										<ChevronDown class="mr-1 inline h-4 w-4" />
+										{expandedNode.label}
+									</p>
+								{/if}
+								{@render renderLevel(expandedNode, depth + 1)}
 							{:else}
-								<Button
-									variant="ghost"
-									class="w-full justify-start"
-									onclick={() => selectNode(child.id)}
-								>
-									{child.label}
-								</Button>
+								<!-- Deepest level — show all children -->
+								{#each parentNode.children as child}
+									{#if child.children.length > 0}
+										<Button
+											variant="ghost"
+											class="w-full justify-start"
+											onclick={() => expandNode(child)}
+										>
+											<ChevronRight class="mr-1 h-4 w-4" />
+											{child.label}
+										</Button>
+									{:else}
+										<Button
+											variant={selectedNodeId === child.id ? 'default' : 'ghost'}
+											class="w-full justify-start"
+											onclick={() => selectLeaf(child.id)}
+										>
+											{child.label}
+										</Button>
+									{/if}
+								{/each}
 							{/if}
 						</div>
-					{/each}
-				</div>
+					{/snippet}
+
+					{@render renderLevel(pathStack[0], 0)}
+
+					<!-- Submit button: appears when any node is selected -->
+					{#if selectedNodeId}
+						<div class="mt-4 flex justify-end">
+							<Button onclick={submitSelection}>Submit Answer</Button>
+						</div>
+					{/if}
+				{/if}
 			</Card.Content>
 		</Card.Root>
 	{:else if phase === 'confidence'}
