@@ -86,6 +86,27 @@
 		phase = 'confidence';
 	}
 
+	async function submitResponses() {
+		await fetch(`/study/${data.study.id}/submit`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				participantName,
+				responses
+			})
+		});
+	}
+
+	async function advanceOrFinish() {
+		if (currentTaskIndex < data.tasks.length - 1) {
+			currentTaskIndex++;
+			resetTask();
+		} else {
+			phase = 'done';
+			await submitResponses();
+		}
+	}
+
 	async function submitConfidence() {
 		const currentTask = data.tasks[currentTaskIndex];
 		responses.push({
@@ -98,21 +119,22 @@
 			clickHistory: [...clickHistory]
 		});
 
-		// Move to next task or finish
-		if (currentTaskIndex < data.tasks.length - 1) {
-			currentTaskIndex++;
-			resetTask();
-		} else {
-			phase = 'done';
-			await fetch(`/study/${data.study.id}/submit`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					participantName,
-					responses
-				})
-			});
-		}
+		await advanceOrFinish();
+	}
+
+	async function skipTask() {
+		const currentTask = data.tasks[currentTaskIndex];
+		responses.push({
+			taskId: currentTask.id,
+			selectedNodeId: null,
+			isCorrect: false,
+			confidence: null,
+			durationMs: Date.now() - taskStartTime,
+			timeToFirstClickMs: firstClickRecorded ? timeToFirstClick : null,
+			clickHistory: [...clickHistory]
+		});
+
+		await advanceOrFinish();
 	}
 
 	function resetTask() {
@@ -153,8 +175,17 @@
 	{:else if phase === 'task'}
 		<Card.Root>
 			<Card.Header>
-				<Card.Description>Task {currentTaskIndex + 1} of {data.tasks.length}</Card.Description>
-				<Card.Title class="text-lg">{data.tasks[currentTaskIndex].prompt}</Card.Title>
+				<div class="flex items-start justify-between">
+					<div>
+						<Card.Description>Task {currentTaskIndex + 1} of {data.tasks.length}</Card.Description>
+						<Card.Title class="text-lg">{data.tasks[currentTaskIndex].prompt}</Card.Title>
+					</div>
+					{#if taskStarted}
+						<button class="text-xs text-muted-foreground underline-offset-2 hover:underline" onclick={skipTask}>
+							Skip
+						</button>
+					{/if}
+				</div>
 			</Card.Header>
 			<Card.Content>
 				{#if !taskStarted}
@@ -210,7 +241,6 @@
 
 					{@render renderLevel(pathStack[0], 0)}
 
-					<!-- Submit button: appears when any node is selected -->
 					{#if selectedNodeId}
 						<div class="mt-4 flex justify-end">
 							<Button onclick={submitSelection}>Submit Answer</Button>
