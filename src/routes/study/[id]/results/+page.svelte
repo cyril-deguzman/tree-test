@@ -1,12 +1,14 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 
 	let { data } = $props();
 
 	let expandedTask = $state<string | null>(null);
+	let pathsModalTask = $state<(typeof data.taskSummaries)[0] | null>(null);
 
 	function toggleTask(taskId: string) {
 		expandedTask = expandedTask === taskId ? null : taskId;
@@ -27,7 +29,8 @@
 			'Directness',
 			'Lostness',
 			'Backtracks',
-			'Avg Hesitation (ms)'
+			'Avg Hesitation (ms)',
+			'Click Path'
 		];
 
 		const rows = data.csvRows.map((r) =>
@@ -45,11 +48,12 @@
 				r.directness,
 				r.lostness,
 				r.backtrackCount,
-				r.avgHesitationMs
+				r.avgHesitationMs,
+				`"${r.clickPath}"`
 			].join(',')
 		);
 
-		const csv = [headers.join(','), ...rows].join('\n');
+		const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
 		const blob = new Blob([csv], { type: 'text/csv' });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
@@ -153,13 +157,22 @@
 
 				<!-- Expand/collapse per-response detail -->
 				{#if taskSummary.responses.length > 0}
-					<Button
-						variant="ghost"
-						size="sm"
-						onclick={() => toggleTask(taskSummary.id)}
-					>
-						{expandedTask === taskSummary.id ? 'Hide' : 'Show'} individual responses ({taskSummary.totalCount})
-					</Button>
+					<div class="flex gap-2">
+						<Button
+							variant="ghost"
+							size="sm"
+							onclick={() => toggleTask(taskSummary.id)}
+						>
+							{expandedTask === taskSummary.id ? 'Hide' : 'Show'} individual responses ({taskSummary.totalCount})
+						</Button>
+						<Button
+							variant="ghost"
+							size="sm"
+							onclick={() => (pathsModalTask = taskSummary)}
+						>
+							View Paths
+						</Button>
+					</div>
 
 					{#if expandedTask === taskSummary.id}
 						<div class="mt-3">
@@ -218,3 +231,53 @@
 		</Card.Root>
 	{/if}
 </div>
+
+<!-- Paths comparison modal -->
+<Dialog.Root
+	open={pathsModalTask !== null}
+	onOpenChange={(open) => { if (!open) pathsModalTask = null; }}
+>
+	<Dialog.Content class="sm:max-w-[80vw] max-h-[80vh] overflow-y-auto">
+		{#if pathsModalTask}
+			<Dialog.Header>
+				<Dialog.Title>Navigation Paths</Dialog.Title>
+				<Dialog.Description>{pathsModalTask.prompt}</Dialog.Description>
+			</Dialog.Header>
+			<div class="space-y-3 pt-4">
+				{#each pathsModalTask.responses as r}
+					<div class="flex items-start gap-3">
+						<div class="w-24 shrink-0 pt-0.5">
+							<p class="text-sm font-medium truncate">{r.participantName}</p>
+							{#if r.skipped}
+								<Badge variant="outline" class="text-xs">Skipped</Badge>
+							{:else if r.isCorrect}
+								<Badge variant="default" class="text-xs">Correct</Badge>
+							{:else}
+								<Badge variant="destructive" class="text-xs">Wrong</Badge>
+							{/if}
+						</div>
+						<div class="flex flex-wrap items-center gap-1">
+							{#each r.clickPathSteps as step, j}
+								{#if j > 0}
+									<span class="text-xs text-muted-foreground">→</span>
+								{/if}
+								{#if step.action === 'back'}
+									<span class="rounded border border-dashed border-muted-foreground/40 px-1.5 py-0.5 text-xs text-muted-foreground line-through">
+										{step.label}
+									</span>
+								{:else}
+									<span class="rounded bg-muted px-1.5 py-0.5 text-xs">
+										{step.label}
+									</span>
+								{/if}
+							{/each}
+							{#if r.clickPathSteps.length === 0}
+								<span class="text-xs text-muted-foreground">No clicks</span>
+							{/if}
+						</div>
+					</div>
+				{/each}
+			</div>
+		{/if}
+	</Dialog.Content>
+</Dialog.Root>

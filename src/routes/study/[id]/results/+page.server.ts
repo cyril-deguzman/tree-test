@@ -135,6 +135,13 @@ export const load: PageServerLoad = async ({ params }) => {
 			const clicks = (r.clickHistory as ClickEntry[]) ?? [];
 			const metrics = computeMetrics(clicks, optimalPath, t.expectedNodeId);
 			const skipped = r.selectedNodeId === null;
+			const clickPathSteps = clicks.map((c) => ({
+				label: findNodeLabel(treeNodes, c.node_id) ?? c.node_id,
+				action: c.action as 'expand' | 'back' | 'select'
+			}));
+			const clickPath = clickPathSteps
+				.map((s) => (s.action === 'back' ? `← ${s.label}` : s.label))
+				.join(' → ');
 			return {
 				participantName: r.participantName ?? 'Anonymous',
 				selectedNodeId: r.selectedNodeId,
@@ -146,6 +153,8 @@ export const load: PageServerLoad = async ({ params }) => {
 				confidence: r.confidence,
 				durationMs: r.durationMs,
 				timeToFirstClickMs: r.timeToFirstClickMs,
+				clickPath,
+				clickPathSteps,
 				...metrics
 			};
 		});
@@ -199,7 +208,13 @@ export const load: PageServerLoad = async ({ params }) => {
 			directness: metrics.directness,
 			lostness: metrics.lostness,
 			backtrackCount: metrics.backtrackCount,
-			avgHesitationMs: metrics.avgHesitationMs
+			avgHesitationMs: metrics.avgHesitationMs,
+			clickPath: clicks
+				.map((c) => {
+					const label = findNodeLabel(treeNodes, c.node_id) ?? c.node_id;
+					return c.action === 'back' ? `← ${label}` : label;
+				})
+				.join(' → ')
 		};
 	});
 
