@@ -19,7 +19,7 @@ function buildDepthMap(node: TreeNode, depth = 0): Map<string, number> {
 }
 
 /** Find the shortest path length from root to a target node */
-function findOptimalPathLength(node: TreeNode, targetId: string, depth = 0): number | null {
+function findOptimalPathLength(node: TreeNode, targetId: string, depth = 1): number | null {
 	if (node.id === targetId) return depth;
 	for (const child of node.children) {
 		const result = findOptimalPathLength(child, targetId, depth + 1);
