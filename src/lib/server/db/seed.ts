@@ -28,7 +28,7 @@ async function seed() {
     await db.insert(task).values({
       studyId: newStudy.id,
       prompt: t.prompt,
-      expectedNodeId: t.expectedNodeId,
+      expectedNodeIds: t.expectedNodeIds,
     });
   }
 

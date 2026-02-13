@@ -18,7 +18,7 @@ export const task = pgTable('task', {
   id: uuid('id').defaultRandom().primaryKey(),
   studyId: uuid('study_id').notNull().references(() => study.id, { onDelete: 'cascade' }),
   prompt: text('prompt').notNull(),
-  expectedNodeId: text('expected_node_id').notNull(),
+  expectedNodeIds: text('expected_node_id').array().notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 

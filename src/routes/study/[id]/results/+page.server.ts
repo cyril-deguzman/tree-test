@@ -114,8 +114,12 @@ export const load: PageServerLoad = async ({ params }) => {
 	// Build per-task summaries
 	const taskSummaries = tasks.map((t) => {
 		const taskResponses = allResponses.filter((r) => r.taskId === t.id);
-		const optimalPath = findOptimalPathLength(treeNodes, t.expectedNodeId) ?? 1;
-		const expectedLabel = findNodeLabel(treeNodes, t.expectedNodeId) ?? t.expectedNodeId;
+		const optimalPath = Math.min(
+			...t.expectedNodeIds.map((id) => findOptimalPathLength(treeNodes, id) ?? Infinity)
+		) || 1;
+		const expectedLabel = t.expectedNodeIds
+			.map((id) => findNodeLabel(treeNodes, id) ?? id)
+			.join(', ');
 
 		const skippedCount = taskResponses.filter((r) => r.selectedNodeId === null).length;
 		const correctCount = taskResponses.filter((r) => r.isCorrect).length;
@@ -133,7 +137,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		// Compute detailed metrics per response
 		const detailedResponses = taskResponses.map((r) => {
 			const clicks = (r.clickHistory as ClickEntry[]) ?? [];
-			const metrics = computeMetrics(clicks, optimalPath, t.expectedNodeId);
+			const metrics = computeMetrics(clicks, optimalPath, t.expectedNodeIds[0]);
 			const skipped = r.selectedNodeId === null;
 			const clickPathSteps = clicks.map((c) => ({
 				label: findNodeLabel(treeNodes, c.node_id) ?? c.node_id,
@@ -172,7 +176,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		return {
 			id: t.id,
 			prompt: t.prompt,
-			expectedNodeId: t.expectedNodeId,
+			expectedNodeIds: t.expectedNodeIds,
 			expectedLabel,
 			optimalPath,
 			totalCount,
@@ -191,13 +195,15 @@ export const load: PageServerLoad = async ({ params }) => {
 	const csvRows = allResponses.map((r) => {
 		const t = tasks.find((t) => t.id === r.taskId);
 		const clicks = (r.clickHistory as ClickEntry[]) ?? [];
-		const optimalPath = t ? (findOptimalPathLength(treeNodes, t.expectedNodeId) ?? 1) : 1;
-		const metrics = computeMetrics(clicks, optimalPath, t?.expectedNodeId ?? '');
+		const optimalPath = t
+			? Math.min(...t.expectedNodeIds.map((id) => findOptimalPathLength(treeNodes, id) ?? Infinity)) || 1
+			: 1;
+		const metrics = computeMetrics(clicks, optimalPath, t?.expectedNodeIds[0] ?? '');
 
 		return {
 			participant: r.participantName ?? 'Anonymous',
 			taskPrompt: t?.prompt ?? '',
-			expectedNode: t?.expectedNodeId ?? '',
+			expectedNode: t?.expectedNodeIds.join(', ') ?? '',
 			selectedNode: r.selectedNodeId ?? 'SKIPPED',
 			isCorrect: r.selectedNodeId === null ? 'SKIPPED' : r.isCorrect,
 			confidence: r.confidence,

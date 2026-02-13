@@ -112,7 +112,7 @@
 		responses.push({
 			taskId: currentTask.id,
 			selectedNodeId,
-			isCorrect: selectedNodeId === currentTask.expectedNodeId,
+			isCorrect: selectedNodeId !== null && currentTask.expectedNodeIds.includes(selectedNodeId),
 			confidence: confidence,
 			durationMs: Date.now() - taskStartTime,
 			timeToFirstClickMs: timeToFirstClick,
