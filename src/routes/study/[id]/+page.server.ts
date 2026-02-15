@@ -24,6 +24,12 @@ export const load: PageServerLoad = async ({ params }) => {
     .from(task)
     .where(eq(task.studyId, params.id));
 
+  // Fisher-Yates shuffle for counterbalancing task order
+  for (let i = tasks.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [tasks[i], tasks[j]] = [tasks[j], tasks[i]];
+  }
+
   return {
     study: foundStudy,
     tree: foundTree,
