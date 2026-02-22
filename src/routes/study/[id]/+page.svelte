@@ -2,7 +2,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Input } from '$lib/components/ui/input';
-	import { Slider } from '$lib/components/ui/slider';
+
 	import { ChevronRight, ChevronDown } from '@lucide/svelte';
 
 	let { data } = $props();
@@ -256,8 +256,22 @@
 				<Card.Description>Rate your confidence from 1 (guessing) to 10 (certain)</Card.Description>
 			</Card.Header>
 			<Card.Content class="space-y-4">
-				<Slider type="single" bind:value={confidence} min={1} max={10} step={1} />
-				<p class="text-center text-2xl font-bold">{confidence}</p>
+				<div class="flex items-center justify-between gap-1">
+					{#each Array.from({ length: 10 }, (_, i) => i + 1) as n}
+						<Button
+							variant={confidence === n ? 'default' : 'outline'}
+							size="sm"
+							class="h-10 w-10 p-0"
+							onclick={() => (confidence = n)}
+						>
+							{n}
+						</Button>
+					{/each}
+				</div>
+				<div class="flex justify-between text-xs text-muted-foreground">
+					<span>Guessing</span>
+					<span>Certain</span>
+				</div>
 			</Card.Content>
 			<Card.Footer>
 				<Button onclick={submitConfidence}>Next</Button>

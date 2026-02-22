@@ -1,54 +1,185 @@
 {
-  "title": "Sample E-commerce Study",
-  "researcherName": "Test Researcher",
-  "description": "A sample tree test for an e-commerce website navigation.",
+  "title": "Adarna House Tree Test",
+  "researcherName": "ADRNA Research",
+  "description": "A tree test study for the Adarna House website navigation.",
   "tree": {
     "id": "root",
     "label": "Home",
     "children": [
+      { "id": "bulk-order", "label": "Bulk Order", "children": [] },
+      { "id": "for-international-buyers", "label": "For International Buyers", "children": [] },
+      { "id": "for-scopers", "label": "For Scopers", "children": [] },
       {
-        "id": "products",
-        "label": "Products",
+        "id": "books",
+        "label": "Books",
         "children": [
-          { "id": "electronics", "label": "Electronics", "children": [] },
-          { "id": "clothing", "label": "Clothing", "children": [] },
-          { "id": "books", "label": "Books", "children": [] }
+          { "id": "on-sale", "label": "On Sale", "children": [] },
+          { "id": "newest-titles", "label": "Newest Titles", "children": [] },
+          { "id": "by-reading-level-age", "label": "By Reading Level / Age", "children": [] },
+          { "id": "by-book-type", "label": "By Book Type", "children": [] },
+          { "id": "by-subject-matter", "label": "By Subject Matter", "children": [] },
+          { "id": "anino-comics", "label": "Anino Comics", "children": [] },
+          { "id": "award-winning-titles", "label": "Award-Winning Titles", "children": [] },
+          { "id": "rio-alma-collection", "label": "Rio Alma Collection", "children": [] }
         ]
       },
       {
-        "id": "account",
-        "label": "My Account",
+        "id": "exclusive-products",
+        "label": "Exclusive Products",
         "children": [
-          { "id": "orders", "label": "Order History", "children": [] },
-          { "id": "settings", "label": "Settings", "children": [
-            { "id": "password", "label": "Change Password", "children": [] },
-            { "id": "notifications", "label": "Notifications", "children": [] }
-          ]}
+          { "id": "big-books", "label": "Big Books", "children": [] },
+          { "id": "wikahon", "label": "WiKAHON", "children": [] },
+          { "id": "alamin-alamin", "label": "Alamin, Alamin", "children": [] }
         ]
       },
       {
-        "id": "support",
-        "label": "Help & Support",
+        "id": "programs-services",
+        "label": "Programs & Services",
         "children": [
-          { "id": "faq", "label": "FAQ", "children": [] },
-          { "id": "contact", "label": "Contact Us", "children": [] },
-          { "id": "returns", "label": "Returns & Refunds", "children": [] }
+          { "id": "educational-workshops", "label": "Educational Workshops", "children": [] },
+          { "id": "live-storytelling-sessions", "label": "Live Storytelling Sessions", "children": [] },
+          { "id": "writer-artist-talks", "label": "Writer and Artist Talks", "children": [] },
+          { "id": "book-drive", "label": "Book Drive", "children": [] },
+          { "id": "sponsor-a-library", "label": "Sponsor a Library", "children": [] }
         ]
-      }
+      },
+      {
+        "id": "publishing-rights",
+        "label": "Publishing & Rights",
+        "children": [
+          { "id": "getting-published", "label": "Getting Published", "children": [] },
+          { "id": "purchasing-rights", "label": "Purchasing Rights", "children": [] },
+          { "id": "using-our-ip", "label": "Using Our Intellectual Property", "children": [] }
+        ]
+      },
+      {
+        "id": "about-us",
+        "label": "About Us",
+        "children": [
+          { "id": "our-story", "label": "Our Story", "children": [] },
+          { "id": "partner-with-us", "label": "Partner With Us", "children": [] },
+          { "id": "contact-us", "label": "Contact Us", "children": [] }
+        ]
+      },
+      { "id": "help-faqs", "label": "Help & FAQs", "children": [] }
     ]
   },
   "tasks": [
     {
-      "prompt": "Where would you go to change your password?",
-      "expectedNodeId": "password"
+      "prompt": "You're not sure what kind of book you're looking for. Where could you browse for all Adarna House books?",
+      "expectedNodeIds": ["books"]
     },
     {
-      "prompt": "Where would you find information about returning a product?",
-      "expectedNodeId": "returns"
+      "prompt": "You need to purchase a large amount of books. How can you do that?",
+      "expectedNodeIds": ["bulk-order"]
     },
     {
-      "prompt": "Where would you go to browse for laptops?",
-      "expectedNodeId": "electronics"
+      "prompt": "You're not residing in the Philippines but you still want to make an order from Adarna House. How would you do that?",
+      "expectedNodeIds": ["for-international-buyers", "contact-us"]
+    },
+    {
+      "prompt": "Find where you can buy discounted books.",
+      "expectedNodeIds": ["on-sale"]
+    },
+    {
+      "prompt": "Purchase a book appropriate for your 6-year-old child.",
+      "expectedNodeIds": ["by-reading-level-age"]
+    },
+    {
+      "prompt": "You want to give a preschool child a book as a gift. Find the list of books appropriate for them.",
+      "expectedNodeIds": ["by-reading-level-age"]
+    },
+    {
+      "prompt": "Look for a book about Mathematics.",
+      "expectedNodeIds": ["by-subject-matter"]
+    },
+    {
+      "prompt": "Look for books discussing mental illness and child development.",
+      "expectedNodeIds": ["by-subject-matter"]
+    },
+    {
+      "prompt": "Buy a picture book.",
+      "expectedNodeIds": ["by-book-type"]
+    },
+    {
+      "prompt": "You've heard about WiKAHON, which is a leveled-reading materials and activities collection. Where can you find more about it?",
+      "expectedNodeIds": ["wikahon"]
+    },
+    {
+      "prompt": "Where can you find Adarna House's official Facebook page?",
+      "expectedNodeIds": ["root", "about-us"]
+    },
+    {
+      "prompt": "Look for Adarna House's email.",
+      "expectedNodeIds": ["contact-us"]
+    },
+    {
+      "prompt": "Where can you find Adarna House's physical location?",
+      "expectedNodeIds": ["about-us"]
+    },
+    {
+      "prompt": "You want to find out if Adarna House does same-day delivery. Where do you go?",
+      "expectedNodeIds": ["help-faqs"]
+    },
+    {
+      "prompt": "You want to publish your own children's book to Adarna House. Find out how.",
+      "expectedNodeIds": ["getting-published"]
+    },
+    {
+      "prompt": "Your company wants to collaborate with Adarna House for a branding partnership opportunity. Where would you go?",
+      "expectedNodeIds": ["partner-with-us", "contact-us"]
+    },
+    {
+      "prompt": "You plan to pay a visit to Adarna House's physical store. Where can you find information on their opening and closing hours?",
+      "expectedNodeIds": ["help-faqs", "about-us"]
+    },
+    {
+      "prompt": "You are a celebrity who wants to promote your advocacy for children's learning. Collaborate with Adarna House.",
+      "expectedNodeIds": ["partner-with-us", "contact-us"]
+    },
+    {
+      "prompt": "You're looking for a job and you want to apply at Adarna House. How do you know if they are hiring?",
+      "expectedNodeIds": ["help-faqs"]
+    },
+    {
+      "prompt": "Where do you find the information as to whether Adarna House allows cash on delivery (COD) or not?",
+      "expectedNodeIds": ["help-faqs"]
+    },
+    {
+      "prompt": "Your book order is delayed. How can you follow-up on your order?",
+      "expectedNodeIds": ["help-faqs", "contact-us"]
+    },
+    {
+      "prompt": "You are a foreign publisher and want to learn about purchasing book rights. Where do you go?",
+      "expectedNodeIds": ["purchasing-rights"]
+    },
+    {
+      "prompt": "Look for a way to sponsor a children's library.",
+      "expectedNodeIds": ["sponsor-a-library"]
+    },
+    {
+      "prompt": "Find out how you can organize a session for teachers and parents to learn how to encourage children's reading and learning.",
+      "expectedNodeIds": ["educational-workshops"]
+    },
+    {
+      "prompt": "You want to invite book authors and illustrators to share their creative experiences with students. Look for a way to hire Adarna House's book authors and illustrators.",
+      "expectedNodeIds": ["writer-artist-talks"]
+    },
+    {
+      "prompt": "Find out how you can hire storytellers from Adarna House to organize a storytelling session with children.",
+      "expectedNodeIds": ["live-storytelling-sessions"]
+    },
+    {
+      "prompt": "Your company wants to publish their own children's book. Find where you can hire Adarna House's writers to help with direction and logistics.",
+      "expectedNodeIds": ["getting-published"]
+    },
+    {
+      "prompt": "Where would you look for information on how organize a book donation event with Adarna House?",
+      "expectedNodeIds": ["book-drive"]
+    },
+    {
+      "prompt": "You are a DepEd scoper. Where can you find the scoping specs catalog for AH books?",
+      "expectedNodeIds": ["for-scopers"]
     }
   ]
 }
