@@ -35,10 +35,10 @@
 
 		const rows = data.csvRows.map((r) =>
 			[
-				r.participant,
+				`"${r.participant}"`,
 				`"${r.taskPrompt}"`,
-				r.expectedNode,
-				r.selectedNode,
+				`"${r.expectedNode}"`,
+				`"${r.selectedNode}"`,
 				r.isCorrect,
 				r.confidence,
 				r.durationMs,
